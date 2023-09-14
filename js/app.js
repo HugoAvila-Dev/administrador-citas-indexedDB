@@ -202,7 +202,7 @@ function nuevaCita(e) {
         editando = false;
 
     } else {
-        // Nuevo Registrando
+        // Nuevo Registro
 
         // Generar un ID único
         citaObj.id = Date.now();
@@ -210,8 +210,23 @@ function nuevaCita(e) {
         // Añade la nueva cita
         administrarCitas.agregarCita({...citaObj});
 
-        // Mostrar mensaje de que todo esta bien...
-        ui.imprimirAlerta('Se agregó correctamente')
+        //Insertar registro en IndexedDB
+        const transaction = DB.transaction(['citas'], 'readwrite');
+
+        //Habilitar el objectsore
+        const objectStore = transaction.objectStore('citas')
+
+        //Insertar en la BD
+        objectStore.add(citaObj);
+
+        transaction.onComplete = function() {
+            console.log('Cita Agregada');
+
+            // Mostrar mensaje de que todo esta bien...
+            ui.imprimirAlerta('Se agregó correctamente')
+        }
+
+
     }
 
 
