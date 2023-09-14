@@ -105,7 +105,7 @@ class UI {
 
         this.textoHeading(citas);
         
-        //Leer el contenido de la base de daots
+        //Leer el contenido de la base de datos
         const objectStore = DB.transaction('citas').objectStore('citas')
         
         const total = objectStore.count();
@@ -155,6 +155,7 @@ class UI {
     
                 // Añade un botón de editar...
                 const btnEditar = document.createElement('button');
+                const cita = cursor.value;
                 btnEditar.onclick = () => cargarEdicion(cita);
     
                 btnEditar.classList.add('btn', 'btn-info');
@@ -213,12 +214,22 @@ function nuevaCita(e) {
         // Estamos editando
         administrarCitas.editarCita({ ...citaObj });
 
-        ui.imprimirAlerta('Guardado Correctamente');
+        //Edita en IndexedDB
+        const transaction = DB.transaction(['citas'], 'readwrite');
+        const objectStore = transaction.objectStore('citas');
 
-        formulario.querySelector('button[type="submit"]').textContent = 'Crear Cita';
+        objectStore.put(citaObj);
 
-        editando = false;
-
+        transaction.oncomplete = function() {
+            ui.imprimirAlerta('Guardado Correctamente');
+    
+            formulario.querySelector('button[type="submit"]').textContent = 'Crear Cita';
+    
+            editando = false;
+        }
+        transaction.onerror = function() {
+            console.log('Hubo un error')
+        }
     } else {
         // Nuevo Registro
 
